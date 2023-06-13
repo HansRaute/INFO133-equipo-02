@@ -1,4 +1,4 @@
 # INFO133-equipo-02
-Hans Raute
+Cristobal Perez
 Cristian Oyarce
 Hans Raute
