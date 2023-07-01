@@ -19,6 +19,7 @@ headers = {'user-agent':random.choice(USER_AGENT_LIST) }
 xpath_title="//div//h1"
 xpath_date="//meta[@property='article:published_time']//@content"
 xpath_text="//div[@class='abody-basic']//p"
+xpath_news_url = "//div[@class='news-item']//a//@href" # Este xpath es un ejemplo, debes adaptarlo a la estructura de la página
 
 try:
     conn = mariadb.connect(
@@ -33,24 +34,30 @@ except mariadb.Error as e:
     sys.exit(1)
 
 cur = conn.cursor()
-cur.execute("SELECT URL_Principal FROM SitioWeb") # Asume que la columna "URL_Principal" es la que contiene las URLs de las noticias
+cur.execute("SELECT URL_Categoria, ID_Prensa FROM MedioDePrensa") # Asume que la columna "URL_Categoria" es la que contiene las URLs de las noticias
 
-urls = [url[0] for url in cur.fetchall()] 
+url_and_prensa_ids = cur.fetchall() 
 
-for url in urls:
+for url, prensa_id in url_and_prensa_ids:
     response = session.get(url, headers=headers)
-    title = response.html.xpath(xpath_title)[0].text
-    date = format_date(response.html.xpath(xpath_date)[0])
-    list_p = response.html.xpath(xpath_text)
-    text = " ".join([p.text.strip() for p in list_p])
+    news_urls = response.html.xpath(xpath_news_url) # Extrayendo URLs de noticias
 
-    text = w3lib.html.remove_tags(text)
-    text = w3lib.html.replace_escape_chars(text)
-    text = html.unescape(text)
+    for news_url in news_urls:
+        response = session.get(news_url, headers=headers)
+        title = response.html.xpath(xpath_title)[0].text
+        date = format_date(response.html.xpath(xpath_date)[0])
+        list_p = response.html.xpath(xpath_text)
+        text = " ".join([p.text.strip() for p in list_p])
 
-    query = f"INSERT INTO MedioDePrensa (URL_Principal, Nombre, AñoDeFundacion, Contenido) VALUES (?, ?, ?, ?)"
-    cur.execute(query, (url, title, date, text))
-    conn.commit()
-    time.sleep(1)
+        text = w3lib.html.remove_tags(text)
+        text = w3lib.html.replace_escape_chars(text)
+        text = html.unescape(text)
+
+        # Ingresar valores en la tabla Noticia
+        query = f"INSERT INTO Noticia (XPATH_Titulo, XPATH_Contenido, XPATH_url, XPATH_Fecha, FK_Medio_de_prensa) VALUES (?, ?, ?, ?, ?)"
+        cur.execute(query, (title, text, news_url, date, prensa_id))
+        conn.commit()
+        time.sleep(1)
 
 conn.close()
+
