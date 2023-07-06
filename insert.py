@@ -9,7 +9,7 @@ def insert_media():
     )
 
     cursor = db.cursor()
-    print("Indica la información del medio que quieres añadir con el  siguiente formato: nombre, ciudad, región, país, continente, año de creación")
+    print("Indica la información del medio que quieres añadir con el siguiente formato: nombre, ciudad, región, país, continente, año de creación")
     media_data = input().split(', ')
 
     add_media = ("INSERT INTO MedioDePrensa "
@@ -18,7 +18,6 @@ def insert_media():
     cursor.execute(add_media, (media_data[0], media_data[1], media_data[2], media_data[3], media_data[4], int(media_data[5])))
     media_id = cursor.lastrowid
 
-  
     print("Indica la información del fundador con el siguiente formato: nombre, fecha de nacimiento")
     founder_data = input().split(', ')
     add_founder = ("INSERT INTO Fundadores "
@@ -44,6 +43,28 @@ def insert_media():
     cursor.close()
     db.close()
 
+def insert_news():
+    db = mysql.connector.connect(
+        host="localhost",
+        user="your_username",
+        password="your_password",
+        database="your_database"
+    )
+
+    cursor = db.cursor()
+    print("Indica la información de la noticia con el siguiente formato: título, contenido, URL, fecha, ID del medio de prensa")
+    news_data = input().split(', ')
+
+    add_news = ("INSERT INTO Noticia "
+                "(XPATH_titulo, XPATH_contenido, XPATH_url, XPATH_fecha, FK_MedioDePrensa) "
+                "VALUES (%s, %s, %s, %s, %s)")
+    cursor.execute(add_news, (news_data[0], news_data[1], news_data[2], news_data[3], int(news_data[4])))
+
+    db.commit()
+    cursor.close()
+    db.close()
+
 if __name__ == "__main__":
     insert_media()
+    insert_news()
 
