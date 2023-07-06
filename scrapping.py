@@ -19,8 +19,7 @@ headers = {'user-agent':random.choice(USER_AGENT_LIST) }
 xpath_title="//div//h1"
 xpath_date="//meta[@property='article:published_time']//@content"
 xpath_text="//div[@class='abody-basic']//p"
-xpath_news_url = "//div[@class='news-item']//a//@href" # Este xpath es un ejemplo, debes adaptarlo a la estructura de la página
-
+xpath_news_url = "//div[@class='news-item']//a//@href" 
 try:
     conn = mariadb.connect(
         user="your_username",
