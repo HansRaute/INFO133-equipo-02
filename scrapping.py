@@ -12,7 +12,6 @@ def format_date(date):
 session = HTMLSession()
 
 USER_AGENT_LIST = [
-    # ... Aquí van tus user agents ...
 ]
 headers = {'user-agent':random.choice(USER_AGENT_LIST) }
 
@@ -33,13 +32,13 @@ except mariadb.Error as e:
     sys.exit(1)
 
 cur = conn.cursor()
-cur.execute("SELECT URL_Categoria, ID_Prensa FROM MedioDePrensa") # Asume que la columna "URL_Categoria" es la que contiene las URLs de las noticias
+cur.execute("SELECT URL_Categoria, ID_Prensa FROM MedioDePrensa")
 
 url_and_prensa_ids = cur.fetchall() 
 
 for url, prensa_id in url_and_prensa_ids:
     response = session.get(url, headers=headers)
-    news_urls = response.html.xpath(xpath_news_url) # Extrayendo URLs de noticias
+    news_urls = response.html.xpath(xpath_news_url)
 
     for news_url in news_urls:
         response = session.get(news_url, headers=headers)
@@ -52,7 +51,6 @@ for url, prensa_id in url_and_prensa_ids:
         text = w3lib.html.replace_escape_chars(text)
         text = html.unescape(text)
 
-        # Ingresar valores en la tabla Noticia
         query = f"INSERT INTO Noticia (XPATH_Titulo, XPATH_Contenido, XPATH_url, XPATH_Fecha, FK_Medio_de_prensa) VALUES (?, ?, ?, ?, ?)"
         cur.execute(query, (title, text, news_url, date, prensa_id))
         conn.commit()
